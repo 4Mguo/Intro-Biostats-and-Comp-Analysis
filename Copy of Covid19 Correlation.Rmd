@@ -1,0 +1,259 @@
+---
+title: "Copy of Covid19 correlation"
+author: "Mo Guo"
+date: "2022-11-21"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(cowplot)
+theme_set(theme_cowplot())
+options(warn=-1)
+```
+
+
+
+```{r}
+x1<-read.csv("~/Documents/Computational Homework/R project/Group Project/owid-covid-data.csv",
+             header=T,encoding="UTF")
+
+x1$date <- as.Date(x1$date)
+x2<-data.frame(x1)
+
+```
+
+
+```{r}
+x2$continent = factor(x2$continent, levels=c("Asia","Europe","Africa","North America","South America","Oceania"))
+x3<-subset(x2,continent!="NA")
+x4<-subset(x3,date=="2022-10-13")
+```
+
+```{r}
+x5<-subset(x4,total_cases_per_million!="NA")
+aggregate(x5[,12:13],list(x5[,2]),mean)
+summarise(x5,mean.total_cases_per_million=mean(total_cases_per_million))
+```
+
+```{r}
+x4<-subset(x3,date=="2022-10-13")
+x7<-subset(x4,total_deaths_per_million!="NA")
+aggregate(x7[,15:16],list(x7[,2]),mean)
+summarise(x7,mean.total_deaths_per_million=mean(total_deaths_per_million))
+```
+
+```{r}
+x4<-subset(x3,date=="2022-10-13")
+x8<-subset(x4,people_fully_vaccinated_per_hundred!="NA")
+aggregate(x8[,44:45],list(x8[,2]),mean)
+summarise(x8,mean.people_fully_vaccinated_per_hundred=mean(people_fully_vaccinated_per_hundred))
+```
+
+```{r}
+x4<-subset(x3,date=="2022-10-13")
+x9<-subset(x4,people_vaccinated_per_hundred!="NA")
+aggregate(x9[,42:44],list(x9[,2]),mean)
+summarise(x9,mean.people_vaccinated_per_hundred=mean(people_vaccinated_per_hundred))
+aggregate(x4[,6:7],list(x4[,2]),mean)
+aggregate(x4[,9:10],list(x4[,2]),mean)
+aggregate(x4[,19:20],list(x4[,2]),mean)
+aggregate(x4[,21:22],list(x4[,2]),mean)
+aggregate(x4[,37:38],list(x4[,2]),mean)
+```
+
+```{r}
+b1<-ggplot(data =x3, mapping =aes(x = date, y = people_fully_vaccinated_per_hundred))+
+  geom_point(shape = ".")+
+  geom_smooth(span=0.2)+
+  labs(x= "Date",y = "People fully vaccinated per hundred (%)")+
+  theme(axis.text.x=element_text(angle=30, hjust=1))
+
+p1<-b1+ xlim(as.Date("2020-01-01"),as.Date("2022-10-13")) + ylim(0,80)+scale_y_continuous(limits = c(0,80), breaks = seq(0,80,20))+
+  scale_x_continuous(limits = c(as.Date("2020-01-01"),as.Date("2022-10-13")), breaks = c(as.Date("2020-01-01"), as.Date("2020-10-1"), as.Date("2021-11-1"),as.Date("2022-10-1")),labels=c("1-Jan-20","1-Oct-20","1-Nov-21","1-Oct-22"))+
+  theme(legend.title=element_text(size=20,face = "bold"), legend.text=element_text(size=20))+
+  theme(axis.text.x=element_text(angle=90, hjust=1, size=15,colour="black"),axis.text.y=element_text(size=15,colour="black"), axis.title.x=element_text(size=20,face = "bold"), axis.title.y=element_text(size=20,face = "bold"))
+p1
+
+p1+ facet_wrap(~continent,ncol = 3)
+```
+
+
+```{r}
+World<-ggplot(x3, aes(x = date, y = people_fully_vaccinated_per_hundred))+
+  geom_point(shape = ".")+
+  geom_smooth(span=0.2)+
+  labs(x= "Date",y = "Worldwide People fully vaccinated per hundred")+
+  theme(axis.text.x=element_text(angle=90, hjust=1))
+
+p2<-World+ xlim(as.Date("2020-01-01"),as.Date("2022-10-13")) + ylim(0,80)+scale_y_continuous(limits = c(0,80), breaks = seq(0,80,20))+
+   scale_x_continuous(limits = c(as.Date("2020-01-01"),as.Date("2022-10-13")), breaks = c(as.Date("2020-01-01"), as.Date("2020-10-1"), as.Date("2021-11-1"),as.Date("2022-10-1")),labels=c("1-Jan-20","1-Oct-20","1-Nov-21","1-Oct-22"))+
+  theme(legend.title=element_text(size=20,face = "bold"), legend.text=element_text(size=20))+
+  theme(axis.text.x=element_text(angle=90, hjust=1, size=15,colour="black"),axis.text.y=element_text(size=15,colour="black"), axis.title.x=element_text(size=20,face = "bold"), axis.title.y=element_text(size=20,face = "bold"))
+p2
+```
+
+```{r}
+p111<-ggplot(x3, aes(x = date, y = new_cases_smoothed_per_million))+
+  geom_point(shape=".")+
+  geom_smooth(span=0.2)+
+  labs(x= "Date",y = "Worldwide New cases per million")+
+  labs(size= "Vaccination coverage (%)")+
+  theme(axis.text.x=element_text(angle=90, hjust=1))
+
+p111+ xlim(as.Date("2020-01-01"),as.Date("2022-10-13"))  + ylim(0,3000)+scale_y_continuous(limits = c(0,3000), breaks = seq(0,3000,1000))+
+   scale_x_continuous(limits = c(as.Date("2020-01-01"),as.Date("2022-10-13")), breaks = c(as.Date("2020-01-01"), as.Date("2020-10-1"), as.Date("2021-11-1"),as.Date("2022-10-1")),labels=c("1-Jan-20","1-Oct-20","1-Nov-21","1-Oct-22"))+
+  theme(legend.title=element_text(size=20,face = "bold"), legend.text=element_text(size=20))+
+  theme(axis.text.x=element_text(angle=90, hjust=1, size=15,colour="black"),axis.text.y=element_text(size=15,colour="black"), axis.title.x=element_text(size=20,face = "bold"), axis.title.y=element_text(size=20,face = "bold"))
+```
+
+
+```{r}
+p111+ xlim(as.Date("2020-01-01"),as.Date("2022-10-13")) + ylim(0,2000)+scale_y_continuous(limits = c(0,2000), breaks = seq(0,2000,1000))+
+   scale_x_continuous(limits = c(as.Date("2020-01-01"),as.Date("2022-10-13")), breaks = c(as.Date("2020-01-01"), as.Date("2020-10-1"), as.Date("2021-11-1"),as.Date("2022-10-1")),labels=c("1-Jan-20","1-Oct-20","1-Nov-21","1-Oct-22"))+
+  theme(legend.title=element_text(size=20,face = "bold"), legend.text=element_text(size=20))+
+  theme(axis.text.x=element_text(angle=90, hjust=1, size=15,colour="black"),axis.text.y=element_text(size=15,colour="black"), axis.title.x=element_text(size=20,face = "bold"), axis.title.y=element_text(size=20,face = "bold"))+
+  facet_wrap(~continent,ncol = 3)
+
+
+```
+
+
+
+```{r}
+p112<-ggplot(x3, aes(x = date, y = new_cases_per_million, size = people_fully_vaccinated_per_hundred))+
+  geom_point(shape=".")+
+  labs(x= "Date",y = "New cases per million")+
+  labs(size= "Vaccination coverage (%)")+
+  theme(axis.text.x=element_text(angle=90, hjust=1))
+p112
+
+p112+ xlim(as.Date("2020-01-01"),as.Date("2022-10-13")) + ylim(0,2000)+scale_y_continuous(limits = c(0,2000), breaks = seq(0,2000,1000))+
+  scale_x_continuous(limits = c(as.Date("2020-01-01"),as.Date("2022-10-13")), breaks = c(as.Date("2020-01-01"), as.Date("2020-10-1"), as.Date("2021-11-1"),as.Date("2022-10-1")),labels=c("1-Jan-20","1-Oct-20","1-Nov-21","1-Oct-22"))+
+  theme(legend.title=element_text(size=10,face = "bold"), legend.text=element_text(size=10))+
+  theme(axis.text.x=element_text(angle=90, hjust=1, size=10,colour="black"),axis.text.y=element_text(size=10,colour="black"), axis.title.x=element_text(size=10,face = "bold"), axis.title.y=element_text(size=15,face = "bold"))
+```
+
+
+```{r}
+p112+ xlim(as.Date("2020-01-01"),as.Date("2022-10-13")) + ylim(0,2000)+scale_y_continuous(limits = c(0,2000), breaks = seq(0,2000,1000))+
+ scale_x_continuous(limits = c(as.Date("2020-01-01"),as.Date("2022-10-13")), breaks = c(as.Date("2020-01-01"), as.Date("2020-10-1"), as.Date("2021-11-1"),as.Date("2022-10-1")),labels=c("1-Jan-20","1-Oct-20","1-Nov-21","1-Oct-22"))+
+  theme(legend.title=element_text(size=20,face = "bold"), legend.text=element_text(size=20))+
+  theme(axis.text.x=element_text(angle=30, hjust=1, size=15,colour="black"),axis.text.y=element_text(size=15,colour="black"), axis.title.x=element_text(size=20,face = "bold"), axis.title.y=element_text(size=20,face = "bold"))+
+  facet_wrap(~continent,ncol = 3)
+```
+
+
+```{r}
+p3<-ggplot(x3, aes(x = date, y = new_deaths_smoothed_per_million))+
+  geom_point(shape=".")+
+  geom_smooth(span=0.2)+
+  labs(x= "Date",y = "Worldwide New deaths per million")+
+  labs(size= "Vaccination coverage (%)")+
+  theme(axis.text.x=element_text(angle=90, hjust=1))
+p3
+
+p3+ xlim(as.Date("2020-01-01"),as.Date("2022-10-13")) + ylim(0,50)+scale_y_continuous(limits = c(0,50), breaks = seq(0,50,25))+
+  scale_x_continuous(limits = c(as.Date("2020-01-01"),as.Date("2022-10-13")), breaks = c(as.Date("2020-01-01"), as.Date("2020-10-1"), as.Date("2021-11-1"),as.Date("2022-10-1")),labels=c("1-Jan-20","1-Oct-20","1-Nov-21","1-Oct-22"))+
+  theme(legend.title=element_text(size=20,face = "bold"), legend.text=element_text(size=20))+
+  theme(axis.text.x=element_text(angle=90, hjust=1, size=15,colour="black"),axis.text.y=element_text(size=15,colour="black"), axis.title.x=element_text(size=20,face = "bold"), axis.title.y=element_text(size=20,face = "bold"))
+```
+
+```{r}
+p3+ xlim(as.Date("2020-01-01"),as.Date("2022-10-13")) + ylim(0,50)+scale_y_continuous(limits = c(0,50), breaks = seq(0,50,25))+
+  scale_x_continuous(limits = c(as.Date("2020-01-01"),as.Date("2022-10-13")), breaks = c(as.Date("2020-01-01"), as.Date("2020-10-1"), as.Date("2021-11-1"),as.Date("2022-10-1")),labels=c("1-Jan-20","1-Oct-20","1-Nov-21","1-Oct-22"))+
+  theme(legend.title=element_text(size=20,face = "bold"), legend.text=element_text(size=20))+
+  theme(axis.text.x=element_text(angle=90, hjust=1, size=15,colour="black"),axis.text.y=element_text(size=15,colour="black"), axis.title.x=element_text(size=20,face = "bold"), axis.title.y=element_text(size=20,face = "bold"))+
+  facet_wrap(~continent,ncol = 3)
+
+```
+
+```{r}
+p4<-ggplot(x3, aes(x = date, y = excess_mortality))+
+  geom_point(shape=".")+
+  geom_smooth(span=0.2)+
+  labs(x= "Date",y = "Worldwide Excess mortality")+
+  labs(size= "Vaccination coverage (%)")+
+  theme(axis.text.x=element_text(angle=90, hjust=1))
+p4
+
+p4+ xlim(as.Date("2020-01-01"),as.Date("2022-10-13")) + ylim(0,200)+scale_y_continuous(limits = c(0,200), breaks = seq(0,200,100))+
+  scale_x_continuous(limits = c(as.Date("2020-01-01"),as.Date("2022-10-13")), breaks = c(as.Date("2020-01-01"), as.Date("2020-10-1"), as.Date("2021-11-1"),as.Date("2022-10-1")),labels=c("1-Jan-20","1-Oct-20","1-Nov-21","1-Oct-22"))+
+  theme(legend.title=element_text(size=20,face = "bold"), legend.text=element_text(size=20))+
+  theme(axis.text.x=element_text(angle=90, hjust=1, size=15,colour="black"),axis.text.y=element_text(size=15,colour="black"), axis.title.x=element_text(size=20,face = "bold"), axis.title.y=element_text(size=20,face = "bold"))
+```
+
+```{r}
+p4+ xlim(as.Date("2020-01-01"),as.Date("2022-10-13")) + ylim(0,200)+scale_y_continuous(limits = c(0,200), breaks = seq(0,200,100))+
+   scale_x_continuous(limits = c(as.Date("2020-01-01"),as.Date("2022-10-13")), breaks = c(as.Date("2020-01-01"), as.Date("2020-10-1"), as.Date("2021-11-1"),as.Date("2022-10-1")),labels=c("1-Jan-20","1-Oct-20","1-Nov-21","1-Oct-22"))+
+  theme(legend.title=element_text(size=20,face = "bold"), legend.text=element_text(size=20))+
+  theme(axis.text.x=element_text(angle=90, hjust=1, size=15,colour="black"),axis.text.y=element_text(size=15,colour="black"), axis.title.x=element_text(size=20,face = "bold"), axis.title.y=element_text(size=20,face = "bold"))+
+  facet_wrap(~continent,ncol = 3)
+```
+
+```{r}
+p5<-ggplot(x3, aes(x = date, y = excess_mortality, size = people_fully_vaccinated_per_hundred))+
+  geom_point(shape=".")+
+  labs(x= "Date",y = "Excess mortality")+
+  labs(size= "Vaccination coverage (%)")+
+  theme(axis.text.x=element_text(angle=90, hjust=1))
+p5
+
+p5+ xlim(as.Date("2020-01-01"),as.Date("2022-10-13")) + ylim(0,50)+scale_y_continuous(limits = c(0,50), breaks = seq(0,50,25))+
+ scale_x_continuous(limits = c(as.Date("2020-01-01"),as.Date("2022-10-13")), breaks = c(as.Date("2020-01-01"), as.Date("2020-10-1"), as.Date("2021-11-1"),as.Date("2022-10-1")),labels=c("1-Jan-20","1-Oct-20","1-Nov-21","1-Oct-22"))+
+  theme(legend.title=element_text(size=10,face = "bold"), legend.text=element_text(size=10))+
+  theme(axis.text.x=element_text(angle=30, hjust=1, size=10,colour="black"),axis.text.y=element_text(size=10,colour="black"), axis.title.x=element_text(size=10,face = "bold"), axis.title.y=element_text(size=15,face = "bold"))
+
+p5+xlim(as.Date("2020-01-01"),as.Date("2022-10-13")) + ylim(0,50)+scale_y_continuous(limits = c(0,50), breaks = seq(0,50,25))+
+  scale_x_continuous(limits = c(as.Date("2020-01-01"),as.Date("2022-10-13")), breaks = c(as.Date("2020-01-01"), as.Date("2020-10-1"), as.Date("2021-11-1"),as.Date("2022-10-1")),labels=c("1-Jan-20","1-Oct-20","1-Nov-21","1-Oct-22"))+
+  theme(legend.title=element_text(size=8,face = "bold"), legend.text=element_text(size=8))+
+  theme(axis.text.x=element_text(angle=90, hjust=1, size=10,colour="black"),axis.text.y=element_text(size=10,colour="black"), axis.title.x=element_text(size=10,face = "bold"), axis.title.y=element_text(size=15,face = "bold"))+
+  facet_wrap(~continent,ncol = 3)
+
+```
+
+
+```{r}
+p4<-ggplot(x3, aes(x = date, y = reproduction_rate))+
+  geom_point(shape=".")+
+  geom_smooth(span=0.2)+
+  labs(x= "Date",y = "Reproduction rate of COVID-19")+
+  theme(axis.text.x=element_text(angle=90, hjust=1))
+p4
+
+p4+ xlim(as.Date("2020-01-01"),as.Date("2022-10-13")) + ylim(0,6)+scale_y_continuous(limits = c(0,6), breaks = seq(0,6,1))+
+  scale_x_continuous(limits = c(as.Date("2020-01-01"),as.Date("2022-10-13")), breaks = c(as.Date("2020-01-01"), as.Date("2020-10-1"), as.Date("2021-11-1"),as.Date("2022-10-1")),labels=c("1-Jan-20","1-Oct-20","1-Nov-21","1-Oct-22"))+
+  theme(legend.title=element_text(size=20,face = "bold"), legend.text=element_text(size=20))+
+  theme(axis.text.x=element_text(angle=90, hjust=1, size=15,colour="black"),axis.text.y=element_text(size=15,colour="black"), axis.title.x=element_text(size=20,face = "bold"), axis.title.y=element_text(size=20,face = "bold"))
+```
+
+```{r}
+p4+ xlim(as.Date("2020-01-01"),as.Date("2022-10-13")) + ylim(0,4)+scale_y_continuous(limits = c(0,4), breaks = seq(0,4,1))+
+  scale_x_continuous(limits = c(as.Date("2020-01-01"),as.Date("2022-10-13")), breaks = c(as.Date("2020-01-01"), as.Date("2020-10-1"), as.Date("2021-11-1"),as.Date("2022-10-1")),labels=c("1-Jan-20","1-Oct-20","1-Nov-21","1-Oct-22"))+
+  theme(legend.title=element_text(size=20,face = "bold"), legend.text=element_text(size=20))+
+  theme(axis.text.x=element_text(angle=90, hjust=1, size=15,colour="black"),axis.text.y=element_text(size=15,colour="black"), axis.title.x=element_text(size=20,face = "bold"), axis.title.y=element_text(size=20,face = "bold"))+
+  facet_wrap(~continent,ncol = 3)
+
+
+
+```
+
+
+```{r}
+library(GGally)
+```
+
+```{r}
+dat<-dplyr::select(x2, people_fully_vaccinated_per_hundred, new_cases_per_million,  excess_mortality, new_deaths_per_million, icu_patients_per_million,reproduction_rate)
+
+p0<-ggpairs(dat)
+
+p0
+
+
+```
+
